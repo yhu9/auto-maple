@@ -1,46 +1,44 @@
 """An interpreter that reads and executes user-created routines."""
 
+import importlib
+import inspect
 import threading
 import time
-import git
-import cv2
-import inspect
-import importlib
 import traceback
-from os.path import splitext, basename
+from os.path import basename, splitext
+
+import cv2
+import git
+
+from src.command_book.command_book import CommandBook
 from src.common import config, utils
+from src.common.interfaces import Configurable
+from src.common.vkeys import click, press
 from src.detection import detection
 from src.routine import components
-from src.routine.routine import Routine
-from src.command_book.command_book import CommandBook
 from src.routine.components import Point
-from src.common.vkeys import press, click
-from src.common.interfaces import Configurable
-
+from src.routine.routine import Routine
 
 # The rune's buff icon
-RUNE_BUFF_TEMPLATE = cv2.imread('assets/rune_buff_template.jpg', 0)
+RUNE_BUFF_TEMPLATE = cv2.imread("assets/rune_buff_template.jpg", 0)
 
 
 class Bot(Configurable):
     """A class that interprets and executes user-defined routines."""
 
-    DEFAULT_CONFIG = {
-        'Interact': 'y',
-        'Feed pet': '9'
-    }
+    DEFAULT_CONFIG = {"Interact": "y", "Feed pet": "9"}
 
     def __init__(self):
         """Loads a user-defined routine on start up and initializes this Bot's main thread."""
 
-        super().__init__('keybindings')
+        super().__init__("keybindings")
         config.bot = self
 
         self.rune_active = False
         self.rune_pos = (0, 0)
-        self.rune_closest_pos = (0, 0)      # Location of the Point closest to rune
+        self.rune_closest_pos = (0, 0)  # Location of the Point closest to rune
         self.submodules = []
-        self.command_book = None            # CommandBook instance
+        self.command_book = None  # CommandBook instance
         # self.module_name = None
         # self.buff = components.Buff()
 
@@ -62,7 +60,7 @@ class Bot(Configurable):
         """
 
         self.update_submodules()
-        print('\n[~] Started main bot loop')
+        print("\n[~] Started main bot loop")
         self.thread.start()
 
     def _main(self):
@@ -71,9 +69,9 @@ class Bot(Configurable):
         :return:    None
         """
 
-        print('\n[~] Initializing detection algorithm:\n')
+        print("\n[~] Initializing detection algorithm:\n")
         model = detection.load_model()
-        print('\n[~] Initialized detection algorithm')
+        print("\n[~] Initialized detection algorithm")
 
         self.ready = True
         config.listener.enabled = True
@@ -87,7 +85,7 @@ class Bot(Configurable):
                 num_pets = pet_settings.num_pets.get()
                 now = time.time()
                 if auto_feed and now - last_fed > 1200 / num_pets:
-                    press(self.config['Feed pet'], 1)
+                    press(self.config["Feed pet"], 1)
                     last_fed = now
 
                 # Highlight the current Point
@@ -96,8 +94,11 @@ class Bot(Configurable):
 
                 # Execute next Point in the routine
                 element = config.routine[config.routine.index]
-                if self.rune_active and isinstance(element, Point) \
-                        and element.location == self.rune_closest_pos:
+                if (
+                    self.rune_active
+                    and isinstance(element, Point)
+                    and element.location == self.rune_closest_pos
+                ):
                     self._solve_rune(model)
                 element.execute()
                 config.routine.step()
@@ -113,38 +114,41 @@ class Bot(Configurable):
         :return:        None
         """
 
-        move = self.command_book['move']
+        move = self.command_book["move"]
         move(*self.rune_pos).execute()
-        adjust = self.command_book['adjust']
+        adjust = self.command_book["adjust"]
         adjust(*self.rune_pos).execute()
         time.sleep(0.2)
-        press(self.config['Interact'], 1, down_time=0.2)        # Inherited from Configurable
 
-        print('\nSolving rune:')
+        # Inherited from Configurable
+        press(self.config["Interact"], 1, down_time=0.2)
+        print("\nSolving rune:")
         inferences = []
         for _ in range(15):
             frame = config.capture.frame
             solution = detection.merge_detection(model, frame)
             if solution:
-                print(', '.join(solution))
+                print(", ".join(solution))
                 if solution in inferences:
-                    print('Solution found, entering result')
+                    print("Solution found, entering result")
                     for arrow in solution:
                         press(arrow, 1, down_time=0.1)
                     time.sleep(1)
                     for _ in range(3):
                         time.sleep(0.3)
                         frame = config.capture.frame
-                        rune_buff = utils.multi_match(frame[:frame.shape[0] // 8, :],
-                                                      RUNE_BUFF_TEMPLATE,
-                                                      threshold=0.9)
+                        rune_buff = utils.multi_match(
+                            frame[: frame.shape[0] // 8, :],
+                            RUNE_BUFF_TEMPLATE,
+                            threshold=0.9,
+                        )
                         if rune_buff:
                             rune_buff_pos = min(rune_buff, key=lambda p: p[0])
                             target = (
-                                round(rune_buff_pos[0] + config.capture.window['left']),
-                                round(rune_buff_pos[1] + config.capture.window['top'])
+                                round(rune_buff_pos[0] + config.capture.window["left"]),
+                                round(rune_buff_pos[1] + config.capture.window["top"]),
                             )
-                            click(target, button='right')
+                            click(target, button="right")
                     self.rune_active = False
                     break
                 elif len(solution) == 4:
@@ -155,7 +159,7 @@ class Bot(Configurable):
             self.command_book = CommandBook(file)
             config.gui.settings.update_class_bindings()
         except ValueError:
-            pass    # TODO: UI warning popup, say check cmd for errors
+            pass  # TODO: UI warning popup, say check cmd for errors
         #
         # utils.print_separator()
         # print(f"[~] Loading command book '{basename(file)}':")
@@ -235,35 +239,37 @@ class Bot(Configurable):
         """
 
         utils.print_separator()
-        print('[~] Retrieving latest submodules:')
+        print("[~] Retrieving latest submodules:")
         self.submodules = []
         repo = git.Repo.init()
-        with open('.gitmodules', 'r') as file:
+        with open(".gitmodules", "r") as file:
             lines = file.readlines()
             i = 0
             while i < len(lines):
-                if lines[i].startswith('[') and i < len(lines) - 2:
-                    path = lines[i + 1].split('=')[1].strip()
-                    url = lines[i + 2].split('=')[1].strip()
+                if lines[i].startswith("[") and i < len(lines) - 2:
+                    path = lines[i + 1].split("=")[1].strip()
+                    url = lines[i + 2].split("=")[1].strip()
                     self.submodules.append(path)
                     try:
-                        repo.git.clone(url, path)       # First time loading submodule
+                        repo.git.clone(url, path)  # First time loading submodule
                         print(f" -  Initialized submodule '{path}'")
                     except git.exc.GitCommandError:
                         sub_repo = git.Repo(path)
                         if not force:
-                            sub_repo.git.stash()        # Save modified content
-                        sub_repo.git.fetch('origin', 'main')
-                        sub_repo.git.reset('--hard', 'FETCH_HEAD')
+                            sub_repo.git.stash()  # Save modified content
+                        sub_repo.git.fetch("origin", "main")
+                        sub_repo.git.reset("--hard", "FETCH_HEAD")
                         if not force:
-                            try:                # Restore modified content
-                                sub_repo.git.checkout('stash', '--', '.')
-                                print(f" -  Updated submodule '{path}', restored local changes")
+                            try:  # Restore modified content
+                                sub_repo.git.checkout("stash", "--", ".")
+                                print(
+                                    f" -  Updated submodule '{path}', restored local changes"
+                                )
                             except git.exc.GitCommandError:
                                 print(f" -  Updated submodule '{path}'")
                         else:
                             print(f" -  Rebuilt submodule '{path}'")
-                        sub_repo.git.stash('clear')
+                        sub_repo.git.stash("clear")
                     i += 3
                 else:
                     i += 1

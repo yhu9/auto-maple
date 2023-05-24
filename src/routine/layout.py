@@ -1,12 +1,14 @@
 """A module for saving map layouts and determining shortest paths."""
 
-import os
-import cv2
 import math
+import os
 import pickle
+from heapq import heappop, heappush
+from os.path import basename, isfile, join, splitext
+
+import cv2
+
 from src.common import config, settings, utils
-from os.path import join, isfile, splitext, basename
-from heapq import heappush, heappop
 
 
 class Node:
@@ -100,10 +102,15 @@ class Layout:
         def check_collision(point):
             return utils.distance(tuple(point), (x, y)) >= Layout.TOLERANCE
 
-        checks = map(check_collision, self.search(x - Layout.TOLERANCE,
-                                                  x + Layout.TOLERANCE,
-                                                  y - Layout.TOLERANCE,
-                                                  y + Layout.TOLERANCE))
+        checks = map(
+            check_collision,
+            self.search(
+                x - Layout.TOLERANCE,
+                x + Layout.TOLERANCE,
+                y - Layout.TOLERANCE,
+                y + Layout.TOLERANCE,
+            ),
+        )
         if all(checks):
             self.root = add_helper(self.root)
 
@@ -184,8 +191,8 @@ class Layout:
                     distances.append(distance)
                     edge_to.append(index)
 
-            x_error = (target[0] - point[0])
-            y_error = (target[1] - point[1])
+            x_error = target[0] - point[0]
+            y_error = target[1] - point[1]
             delta = settings.move_tolerance / math.sqrt(2)
 
             # Push best possible node using horizontal teleport
@@ -196,10 +203,9 @@ class Layout:
                 else:
                     x_min = point[0] - settings.move_tolerance * 2
                     x_max = point[0] - settings.move_tolerance / 4
-                candidates = self.search(x_min,
-                                         x_max,
-                                         point[1] - delta,
-                                         point[1] + delta)
+                candidates = self.search(
+                    x_min, x_max, point[1] - delta, point[1] + delta
+                )
                 push_best(candidates)
 
             # Push best possible node using vertical teleport
@@ -210,10 +216,9 @@ class Layout:
                 else:
                     y_min = 0
                     y_max = point[1] - settings.move_tolerance / 4
-                candidates = self.search(point[0] - delta,
-                                         point[0] + delta,
-                                         y_min,
-                                         y_max)
+                candidates = self.search(
+                    point[0] - delta, point[0] + delta, y_min, y_max
+                )
                 push_best(candidates)
 
         # Perform the A* search algorithm
@@ -268,7 +273,7 @@ class Layout:
         target = os.path.join(get_layouts_dir(), layout_name)
         if isfile(target):
             print(f" -  Found existing Layout file at '{target}'.")
-            with open(target, 'rb') as file:
+            with open(target, "rb") as file:
                 return pickle.load(file)
         else:
             print(f" -  Created new Layout file at '{target}'.")
@@ -287,9 +292,9 @@ class Layout:
         layouts_dir = get_layouts_dir()
         if not os.path.exists(layouts_dir):
             os.makedirs(layouts_dir)
-        with open(join(layouts_dir, self.name), 'wb') as file:
+        with open(join(layouts_dir, self.name), "wb") as file:
             pickle.dump(self, file)
 
 
 def get_layouts_dir():
-    return os.path.join(config.RESOURCES_DIR, 'layouts', config.bot.command_book.name)
+    return os.path.join(config.RESOURCES_DIR, "layouts", config.bot.command_book.name)

@@ -2,11 +2,13 @@
 
 import math
 import queue
-import cv2
 import threading
-import numpy as np
-from src.common import config, settings
 from random import random
+
+import cv2
+import numpy as np
+
+from src.common import config, settings
 
 
 def run_if_enabled(function):
@@ -19,10 +21,11 @@ def run_if_enabled(function):
     def helper(*args, **kwargs):
         if config.enabled:
             return function(*args, **kwargs)
+
     return helper
 
 
-def run_if_disabled(message=''):
+def run_if_disabled(message=""):
     """
     Decorator for functions that should only run while the bot is disabled. If MESSAGE
     is not empty, it will also print that message if its function attempts to run when
@@ -35,7 +38,9 @@ def run_if_disabled(message=''):
                 return function(*args, **kwargs)
             elif message:
                 print(message)
+
         return helper
+
     return decorator
 
 
@@ -62,10 +67,10 @@ def separate_args(arguments):
     kwargs = {}
     for a in arguments:
         a = a.strip()
-        index = a.find('=')
+        index = a.find("=")
         if index > -1:
             key = a[:index].strip()
-            value = a[index+1:].strip()
+            value = a[index + 1 :].strip()
             kwargs[key] = value
         else:
             args.append(a)
@@ -104,9 +109,9 @@ def multi_match(frame, template, threshold=0.95):
     locations = np.where(result >= threshold)
     locations = list(zip(*locations[::-1]))
     results = []
-    for p in locations:
-        x = int(round(p[0] + template.shape[1] / 2))
-        y = int(round(p[1] + template.shape[0] / 2))
+    for loc in locations:
+        x = int(round(loc[0] + template.shape[1] / 2))
+        y = int(round(loc[1] + template.shape[0] / 2))
         results.append((x, y))
     return results
 
@@ -173,26 +178,24 @@ def draw_location(minimap, pos, color):
     """
 
     center = convert_to_absolute(pos, minimap)
-    cv2.circle(minimap,
-               center,
-               round(minimap.shape[1] * settings.move_tolerance),
-               color,
-               1)
+    cv2.circle(
+        minimap, center, round(minimap.shape[1] * settings.move_tolerance), color, 1
+    )
 
 
 def print_separator():
     """Prints a 3 blank lines for visual clarity."""
 
-    print('\n\n')
+    print("\n\n")
 
 
 def print_state():
     """Prints whether Auto Maple is currently enabled or disabled."""
 
     print_separator()
-    print('#' * 18)
+    print("#" * 18)
     print(f"#    {'ENABLED ' if config.enabled else 'DISABLED'}    #")
-    print('#' * 18)
+    print("#" * 18)
 
 
 def closest_point(points, target):
@@ -221,7 +224,7 @@ def bernoulli(p):
 def rand_float(start, end):
     """Returns a random float value in the interval [START, END)."""
 
-    assert start < end, 'START must be less than END'
+    assert start < end, "START must be less than END"
     return (end - start) * random() + start
 
 
@@ -238,7 +241,7 @@ class Async(threading.Thread):
 
     def run(self):
         self.function(*self.args, **self.kwargs)
-        self.queue.put('x')
+        self.queue.put("x")
 
     def process_queue(self, root):
         def f():
@@ -246,6 +249,7 @@ class Async(threading.Thread):
                 self.queue.get_nowait()
             except queue.Empty:
                 root.after(100, self.process_queue(root))
+
         return f
 
 
@@ -256,4 +260,5 @@ def async_callback(context, function, *args, **kwargs):
         task = Async(function, *args, **kwargs)
         task.start()
         context.after(100, task.process_queue(context))
+
     return f

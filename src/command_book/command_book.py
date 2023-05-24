@@ -1,17 +1,19 @@
-import os
-import inspect
 import importlib
+import inspect
+import os
 import traceback
 from os.path import basename, splitext
+
 from src.common import config, utils
-from src.routine import components
 from src.common.interfaces import Configurable
+from src.routine import components
 
-
-CB_KEYBINDING_DIR = os.path.join('resources', 'keybindings')
+CB_KEYBINDING_DIR = os.path.join("resources", "keybindings")
 
 
 class CommandBook(Configurable):
+    """Command Book"""
+
     def __init__(self, file):
         self.name = splitext(basename(file))[0]
         self.buff = components.Buff()
@@ -21,7 +23,7 @@ class CommandBook(Configurable):
             raise ValueError(f"Invalid command book at '{file}'")
         self.dict, self.module = result
         super().__init__(self.name, directory=CB_KEYBINDING_DIR)
-        
+
     def load_commands(self, file):
         """Prompts the user to select a command module to import. Updates config's command book."""
 
@@ -29,7 +31,7 @@ class CommandBook(Configurable):
         print(f"[~] Loading command book '{basename(file)}':")
 
         ext = splitext(file)[1]
-        if ext != '.py':
+        if ext != ".py":
             print(f" !  '{ext}' is not a supported file extension.")
             return
 
@@ -39,34 +41,36 @@ class CommandBook(Configurable):
             new_cb[c.__name__.lower()] = c
 
         # Import the desired command book file
-        target = '.'.join(['resources', 'command_books', self.name])
+        target = ".".join(["resources", "command_books", self.name])
         try:
             module = importlib.import_module(target)
             module = importlib.reload(module)
-        except ImportError:     # Display errors in the target Command Book
-            print(' !  Errors during compilation:\n')
-            for line in traceback.format_exc().split('\n'):
+        except ImportError:  # Display errors in the target Command Book
+            print(" !  Errors during compilation:\n")
+            for line in traceback.format_exc().split("\n"):
                 line = line.rstrip()
                 if line:
-                    print(' ' * 4 + line)
+                    print(" " * 4 + line)
             print(f"\n !  Command book '{self.name}' was not loaded")
             return
 
         # Load key map
-        if hasattr(module, 'Key'):
+        if hasattr(module, "Key"):
             default_config = {}
             for key, value in module.Key.__dict__.items():
-                if not key.startswith('__') and not key.endswith('__'):
+                if not key.startswith("__") and not key.endswith("__"):
                     default_config[key] = value
             self.DEFAULT_CONFIG = default_config
         else:
-            print(f" !  Error loading command book '{self.name}', keymap class 'Key' is missing")
+            print(
+                f" !  Error loading command book '{self.name}', keymap class 'Key' is missing"
+            )
             return
 
         # Check if the 'step' function has been implemented
         step_found = False
         for name, func in inspect.getmembers(module, inspect.isfunction):
-            if name.lower() == 'step':
+            if name.lower() == "step":
                 step_found = True
                 new_step = func
 
@@ -93,10 +97,12 @@ class CommandBook(Configurable):
                 new_cb[name] = command
 
         if not step_found and not movement_found:
-            print(f" !  Error: Must either implement both 'Move' and 'Adjust' commands, "
-                  f"or the function 'step'")
+            print(
+                " !  Error: Must either implement both 'Move' and 'Adjust' commands, "
+                "or the function 'step'"
+            )
         if required_found and (step_found or movement_found):
-            self.buff = new_cb['buff']()
+            self.buff = new_cb["buff"]()
             components.step = new_step
             config.gui.menu.file.enable_routine_state()
             config.gui.view.status.set_cb(basename(file))

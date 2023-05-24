@@ -1,13 +1,14 @@
 import tkinter as tk
+
 from src.gui.edit.commands import Commands
 from src.gui.edit.components import Components
 from src.gui.edit.controls import Controls
-from src.gui.interfaces import LabelFrame, Frame
+from src.gui.interfaces import Frame, LabelFrame
 
 
 class Routine(LabelFrame):
     def __init__(self, parent, **kwargs):
-        super().__init__(parent, 'Routine', **kwargs)
+        super().__init__(parent, "Routine", **kwargs)
 
         self.rowconfigure(0, weight=1)
         self.columnconfigure(0, weight=1)

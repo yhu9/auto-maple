@@ -4,7 +4,7 @@
 #########################
 #       Constants       #
 #########################
-RESOURCES_DIR = 'resources'
+RESOURCES_DIR = "resources"
 
 
 #################################

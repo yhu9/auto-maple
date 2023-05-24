@@ -1,28 +1,30 @@
 """User friendly GUI to interact with Auto Maple."""
 
-import time
 import threading
+import time
 import tkinter as tk
 from tkinter import ttk
+
 from src.common import config, settings
-from src.gui import Menu, View, Edit, Settings
+from src.gui import Edit, Menu, Settings, View
 
 
 class GUI:
     DISPLAY_FRAME_RATE = 30
     RESOLUTIONS = {
-        'DEFAULT': '800x800',
-        'Edit': '1400x800'
+        "View": "800x1000",
+        "Edit": "1800x1000",
+        "Settings": "900x1000",
     }
 
     def __init__(self):
         config.gui = self
 
         self.root = tk.Tk()
-        self.root.title('Auto Maple')
-        icon = tk.PhotoImage(file='assets/icon.png')
+        self.root.title("Auto Maple")
+        icon = tk.PhotoImage(file="assets/icon.png")
         self.root.iconphoto(False, icon)
-        self.root.geometry(GUI.RESOLUTIONS['DEFAULT'])
+        self.root.geometry(GUI.RESOLUTIONS["View"])
         self.root.resizable(False, False)
 
         # Initialize GUI variables
@@ -38,8 +40,8 @@ class GUI:
         self.edit = Edit(self.navigation)
         self.settings = Settings(self.navigation)
 
-        self.navigation.pack(expand=True, fill='both')
-        self.navigation.bind('<<NotebookTabChanged>>', self._resize_window)
+        self.navigation.pack(expand=True, fill="both")
+        self.navigation.bind("<<NotebookTabChanged>>", self._resize_window)
         self.root.focus()
 
     def set_routine(self, arr):
@@ -47,12 +49,14 @@ class GUI:
 
     def clear_routine_info(self):
         """
-        Clears information in various GUI elements regarding the current routine.
-        Does not clear Listboxes containing routine Components, as that is handled by Routine.
+        Clears information in various GUI elements regarding the current
+        routine.
+        Does not clear Listboxes containing routine Components, as that is
+        handled by Routine.
         """
 
         self.view.details.clear_info()
-        self.view.status.set_routine('')
+        self.view.status.set_routine("")
 
         self.edit.minimap.redraw()
         self.edit.routine.commands.clear_contents()
@@ -60,17 +64,19 @@ class GUI:
         self.edit.editor.reset()
 
     def _resize_window(self, e):
-        """Callback to resize entire Tkinter window every time a new Page is selected."""
+        """Callback to resize entire Tkinter window every time a new Page is
+        selected.
+        """
 
         nav = e.widget
         curr_id = nav.select()
-        nav.nametowidget(curr_id).focus()      # Focus the current Tab
-        page = nav.tab(curr_id, 'text')
-        if self.root.state() != 'zoomed':
+        nav.nametowidget(curr_id).focus()  # Focus the current Tab
+        page = nav.tab(curr_id, "text")
+        if self.root.state() != "zoomed":
             if page in GUI.RESOLUTIONS:
                 self.root.geometry(GUI.RESOLUTIONS[page])
             else:
-                self.root.geometry(GUI.RESOLUTIONS['DEFAULT'])
+                self.root.geometry(GUI.RESOLUTIONS["DEFAULT"])
 
     def start(self):
         """Starts the GUI as well as any scheduled functions."""
@@ -100,6 +106,6 @@ class GUI:
             time.sleep(5)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     gui = GUI()
     gui.start()

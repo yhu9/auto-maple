@@ -1,21 +1,28 @@
 import tkinter as tk
+
 import cv2
-from PIL import ImageTk, Image
+from PIL import Image, ImageTk
+
 from src.common import config, utils
-from src.routine.components import Point
 from src.gui.interfaces import LabelFrame
+from src.routine.components import Point
 
 
 class Minimap(LabelFrame):
     def __init__(self, parent, **kwargs):
-        super().__init__(parent, 'Minimap', **kwargs)
+        super().__init__(parent, "Minimap", **kwargs)
 
         self.WIDTH = 400
         self.HEIGHT = 300
-        self.canvas = tk.Canvas(self, bg='black',
-                                width=self.WIDTH, height=self.HEIGHT,
-                                borderwidth=0, highlightthickness=0)
-        self.canvas.pack(expand=True, fill='both', padx=5, pady=5)
+        self.canvas = tk.Canvas(
+            self,
+            bg="black",
+            width=self.WIDTH,
+            height=self.HEIGHT,
+            borderwidth=0,
+            highlightthickness=0,
+        )
+        self.canvas.pack(expand=True, fill="both", padx=5, pady=5)
         self.container = None
 
         self.draw_default()
@@ -67,13 +74,13 @@ class Minimap(LabelFrame):
         """Draws IMG onto the Canvas."""
 
         if config.layout:
-            config.layout.draw(img)     # Display the current Layout
+            config.layout.draw(img)  # Display the current Layout
 
         img = ImageTk.PhotoImage(Image.fromarray(img))
         if self.container is None:
-            self.container = self.canvas.create_image(self.WIDTH // 2,
-                                                      self.HEIGHT // 2,
-                                                      image=img, anchor=tk.CENTER)
+            self.container = self.canvas.create_image(
+                self.WIDTH // 2, self.HEIGHT // 2, image=img, anchor=tk.CENTER
+            )
         else:
             self.canvas.itemconfig(self.container, image=img)
-        self._img = img                 # Prevent garbage collection
+        self._img = img  # Prevent garbage collection

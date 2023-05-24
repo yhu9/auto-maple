@@ -27,8 +27,8 @@ def validate_boolean(value):
     """
 
     value = value.lower()
-    if value in {'true', 'false'}:
-        return True if value == 'true' else False
+    if value in {"true", "false"}:
+        return True if value == "true" else False
     elif int(value) in {0, 1}:
         return bool(int(value))
     raise ValueError(f"'{value}' is not a valid boolean.")
@@ -43,7 +43,7 @@ def validate_arrows(key):
 
     if isinstance(key, str):
         key = key.lower()
-        if key in ['up', 'down', 'left', 'right']:
+        if key in ["up", "down", "left", "right"]:
             return key
     raise ValueError(f"'{key}' is not a valid arrow key.")
 
@@ -57,7 +57,7 @@ def validate_horizontal_arrows(key):
 
     if isinstance(key, str):
         key = key.lower()
-        if key in ['left', 'right']:
+        if key in ["left", "right"]:
             return key
     raise ValueError(f"'{key}' is not a valid horizontal arrow key.")
 
@@ -67,10 +67,10 @@ def validate_horizontal_arrows(key):
 #########################
 # A dictionary that maps each setting to its validator function
 SETTING_VALIDATORS = {
-    'move_tolerance': float,
-    'adjust_tolerance': float,
-    'record_layout': validate_boolean,
-    'buff_cooldown': validate_nonnegative_int
+    "move_tolerance": float,
+    "adjust_tolerance": float,
+    "record_layout": validate_boolean,
+    "buff_cooldown": validate_nonnegative_int,
 }
 
 

@@ -2,6 +2,7 @@
 
 import math
 import time
+
 from src.common import config, settings, utils
 from src.common.vkeys import key_down, key_up, press
 
@@ -10,22 +11,28 @@ from src.common.vkeys import key_down, key_up, press
 #       Routine Components      #
 #################################
 class Component:
-    id = 'Routine Component'
+    id = "Routine Component"
     PRIMITIVES = {int, str, bool, float}
 
     def __init__(self, *args, **kwargs):
         if len(args) > 1:
-            raise TypeError('Component superclass __init__ only accepts 1 (optional) argument: LOCALS')
+            raise TypeError(
+                "Component superclass __init__ only accepts 1 (optional) argument: LOCALS"
+            )
         if len(kwargs) != 0:
-            raise TypeError('Component superclass __init__ does not accept any keyword arguments')
+            raise TypeError(
+                "Component superclass __init__ does not accept any keyword arguments"
+            )
         if len(args) == 0:
             self.kwargs = {}
         elif type(args[0]) != dict:
-            raise TypeError("Component superclass __init__ only accepts arguments of type 'dict'.")
+            raise TypeError(
+                "Component superclass __init__ only accepts arguments of type 'dict'."
+            )
         else:
             self.kwargs = args[0].copy()
-            self.kwargs.pop('__class__')
-            self.kwargs.pop('self')
+            self.kwargs.pop("__class__")
+            self.kwargs.pop("self")
 
     @utils.run_if_enabled
     def execute(self):
@@ -37,33 +44,32 @@ class Component:
     def update(self, *args, **kwargs):
         """Updates this Component's constructor arguments with new arguments."""
 
-        self.__class__(*args, **kwargs)     # Validate arguments before actually updating values
+        self.__class__(
+            *args, **kwargs
+        )  # Validate arguments before actually updating values
         self.__init__(*args, **kwargs)
 
     def info(self):
         """Returns a dictionary of useful information about this Component."""
 
-        return {
-            'name': self.__class__.__name__,
-            'vars': self.kwargs.copy()
-        }
+        return {"name": self.__class__.__name__, "vars": self.kwargs.copy()}
 
     def encode(self):
         """Encodes an object using its ID and its __init__ arguments."""
 
         arr = [self.id]
         for key, value in self.kwargs.items():
-            if key != 'id' and type(self.kwargs[key]) in Component.PRIMITIVES:
-                arr.append(f'{key}={value}')
-        return ', '.join(arr)
+            if key != "id" and type(self.kwargs[key]) in Component.PRIMITIVES:
+                arr.append(f"{key}={value}")
+        return ", ".join(arr)
 
 
 class Point(Component):
     """Represents a location in a user-defined routine."""
 
-    id = '*'
+    id = "*"
 
-    def __init__(self, x, y, frequency=1, skip='False', adjust='False'):
+    def __init__(self, x, y, frequency=1, skip="False", adjust="False"):
         super().__init__(locals())
         self.x = float(x)
         self.y = float(y)
@@ -71,17 +77,21 @@ class Point(Component):
         self.frequency = settings.validate_nonnegative_int(frequency)
         self.counter = int(settings.validate_boolean(skip))
         self.adjust = settings.validate_boolean(adjust)
-        if not hasattr(self, 'commands'):       # Updating Point should not clear commands
+        if not hasattr(
+            self, "commands"
+        ):  # Updating Point should not clear commands
             self.commands = []
 
     def main(self):
         """Executes the set of actions associated with this Point."""
 
         if self.counter == 0:
-            move = config.bot.command_book['move']
+            move = config.bot.command_book["move"]
             move(*self.location).execute()
             if self.adjust:
-                adjust = config.bot.command_book['adjust']      # TODO: adjust using step('up')?
+                adjust = config.bot.command_book[
+                    "adjust"
+                ]  # TODO: adjust using step('up')?
                 adjust(*self.location).execute()
             for command in self.commands:
                 command.execute()
@@ -95,16 +105,16 @@ class Point(Component):
 
     def info(self):
         curr = super().info()
-        curr['vars'].pop('location', None)
-        curr['vars']['commands'] = ', '.join([c.id for c in self.commands])
+        curr["vars"].pop("location", None)
+        curr["vars"]["commands"] = ", ".join([c.id for c in self.commands])
         return curr
 
     def __str__(self):
-        return f'  * {self.location}'
+        return f"  * {self.location}"
 
 
 class Label(Component):
-    id = '@'
+    id = "@"
 
     def __init__(self, label):
         super().__init__(locals())
@@ -118,11 +128,11 @@ class Label(Component):
         self.index = i
 
     def encode(self):
-        return '\n' + super().encode()
+        return "\n" + super().encode()
 
     def info(self):
         curr = super().info()
-        curr['vars']['index'] = self.index
+        curr["vars"]["index"] = self.index
         return curr
 
     def __delete__(self, instance):
@@ -130,15 +140,15 @@ class Label(Component):
         config.routine.labels.pop(self.label)
 
     def __str__(self):
-        return f'{self.label}:'
+        return f"{self.label}:"
 
 
 class Jump(Component):
     """Jumps to the given Label."""
 
-    id = '>'
+    id = ">"
 
-    def __init__(self, label, frequency=1, skip='False'):
+    def __init__(self, label, frequency=1, skip="False"):
         super().__init__(locals())
         self.label = str(label)
         self.frequency = settings.validate_nonnegative_int(frequency)
@@ -175,13 +185,13 @@ class Jump(Component):
             self.link.links.remove(self)
 
     def __str__(self):
-        return f'  > {self.label}'
+        return f"  > {self.label}"
 
 
 class Setting(Component):
     """Changes the value of the given setting variable."""
 
-    id = '$'
+    id = "$"
 
     def __init__(self, target, value):
         super().__init__(locals())
@@ -194,22 +204,17 @@ class Setting(Component):
         setattr(settings, self.key, self.value)
 
     def __str__(self):
-        return f'  $ {self.key} = {self.value}'
+        return f"  $ {self.key} = {self.value}"
 
 
-SYMBOLS = {
-    '*': Point,
-    '@': Label,
-    '>': Jump,
-    '$': Setting
-}
+SYMBOLS = {"*": Point, "@": Label, ">": Jump, "$": Setting}
 
 
 #############################
 #       Shared Commands     #
 #############################
 class Command(Component):
-    id = 'Command Superclass'
+    id = "Command Superclass"
 
     def __init__(self, *args):
         super().__init__(*args)
@@ -217,12 +222,12 @@ class Command(Component):
 
     def __str__(self):
         variables = self.__dict__
-        result = '    ' + self.id
+        result = "    " + self.id
         if len(variables) - 1 > 0:
-            result += ':'
+            result += ":"
         for key, value in variables.items():
-            if key != 'id':
-                result += f'\n        {key}={value}'
+            if key != "id":
+                result += f"\n        {key}={value}"
         return result
 
 
@@ -233,7 +238,7 @@ class Move(Command):
         super().__init__(locals())
         self.target = (float(x), float(y))
         self.max_steps = settings.validate_nonnegative_int(max_steps)
-        self.prev_direction = ''
+        self.prev_direction = ""
 
     def _new_direction(self, new):
         key_down(new)
@@ -246,19 +251,22 @@ class Move(Command):
         path = config.layout.shortest_path(config.player_pos, self.target)
         for i, point in enumerate(path):
             toggle = True
-            self.prev_direction = ''
+            self.prev_direction = ""
             local_error = utils.distance(config.player_pos, point)
             global_error = utils.distance(config.player_pos, self.target)
-            while config.enabled and counter > 0 and \
-                    local_error > settings.move_tolerance and \
-                    global_error > settings.move_tolerance:
+            while (
+                config.enabled
+                and counter > 0
+                and local_error > settings.move_tolerance
+                and global_error > settings.move_tolerance
+            ):
                 if toggle:
                     d_x = point[0] - config.player_pos[0]
                     if abs(d_x) > settings.move_tolerance / math.sqrt(2):
                         if d_x < 0:
-                            key = 'left'
+                            key = "left"
                         else:
-                            key = 'right'
+                            key = "right"
                         self._new_direction(key)
                         step(key, point)
                         if settings.record_layout:
@@ -270,9 +278,9 @@ class Move(Command):
                     d_y = point[1] - config.player_pos[1]
                     if abs(d_y) > settings.move_tolerance / math.sqrt(2):
                         if d_y < 0:
-                            key = 'up'
+                            key = "up"
                         else:
-                            key = 'down'
+                            key = "down"
                         self._new_direction(key)
                         step(key, point)
                         if settings.record_layout:
@@ -304,7 +312,9 @@ def step(direction, target):
     :return:            None
     """
 
-    print("\n[!] Function 'step' not implemented in current command book, aborting process.")
+    print(
+        "\n[!] Function 'step' not implemented in current command book, aborting process."
+    )
     config.enabled = False
 
 
@@ -346,17 +356,19 @@ class Fall(Command):
 
     def main(self):
         start = config.player_pos
-        key_down('down')
+        key_down("down")
         time.sleep(0.05)
         if config.stage_fright and utils.bernoulli(0.5):
             time.sleep(utils.rand_float(0.2, 0.4))
         counter = 6
-        while config.enabled and \
-                counter > 0 and \
-                utils.distance(start, config.player_pos) < self.distance:
-            press('space', 1, down_time=0.1)
+        while (
+            config.enabled
+            and counter > 0
+            and utils.distance(start, config.player_pos) < self.distance
+        ):
+            press("space", 1, down_time=0.1)
             counter -= 1
-        key_up('down')
+        key_up("down")
         time.sleep(0.05)
 
 
@@ -364,5 +376,7 @@ class Buff(Command):
     """Undefined 'buff' command for the default command book."""
 
     def main(self):
-        print("\n[!] 'Buff' command not implemented in current command book, aborting process.")
+        print(
+            "\n[!] 'Buff' command not implemented in current command book, aborting process."
+        )
         config.enabled = False
