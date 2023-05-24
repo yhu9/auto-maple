@@ -1,0 +1,14 @@
+$, target=move_tolerance, value=0.09
+$, target=buff_cooldown, value=185
+
+@, label=kish
+*, x=0.113, y=0.089, frequency=1, skip=False, adjust=True
+    Shikigami, direction=left, attacks=2, repetitions=1
+    Shikigami, direction=right, attacks=2, repetitions=1
+
+@, label=main
+*, x=0.275, y=0.142, frequency=1, skip=False, adjust=True
+    Shikigami, direction=left, attacks=3, repetitions=1
+    Shikigami, direction=right, attacks=3, repetitions=1
+    Wait, duration=0.05
+>, label=kish, frequency=100, skip=False

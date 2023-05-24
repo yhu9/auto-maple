@@ -1,0 +1,47 @@
+$, target=move_tolerance, value=0.06
+$, target=buff_cooldown, value=185
+
+@, label=kish
+*, x=0.274, y=0.113, frequency=1, skip=False, adjust=False
+    Shikigami, direction=left, attacks=3, repetitions=1
+    Shikigami, direction=right, attacks=3, repetitions=1
+    Wait, duration=0.1
+*, x=0.280, y=0.190, frequency=1, skip=False, adjust=False
+    Shikigami, direction=left, attacks=3, repetitions=1
+    Exorcist, jump=False
+    Wait, duration=1.0
+*, x=0.381, y=0.190, frequency=1, skip=False, adjust=False
+    Shikigami, direction=left, attacks=3, repetitions=1
+    Shikigami, direction=right, attacks=3, repetitions=1
+    Wait, duration=0.1
+*, x=0.577, y=0.190, frequency=1, skip=False, adjust=False
+    Shikigami, direction=left, attacks=3, repetitions=1
+    Shikigami, direction=right, attacks=3, repetitions=1
+    Wait, duration=0.1
+*, x=0.815, y=0.190, frequency=1, skip=False, adjust=True
+    Shikigami, direction=left, attacks=2, repetitions=1
+    Shikigami, direction=right, attacks=3, repetitions=1
+    Yaksha, direction=left
+    Wait, duration=0.1
+*, x=0.827, y=0.113, frequency=1, skip=False, adjust=True
+    Shikigami, direction=left, attacks=3, repetitions=1
+    Shikigami, direction=right, attacks=3, repetitions=1
+    Wait, duration=0.1
+*, x=0.815, y=0.190, frequency=1, skip=False, adjust=True
+    Exorcist, jump=False
+    Wait, duration=1.0
+*, x=0.577, y=0.190, frequency=1, skip=False, adjust=False
+    Shikigami, direction=left, attacks=3, repetitions=1
+    Shikigami, direction=right, attacks=3, repetitions=1
+    Wait, duration=0.1
+*, x=0.381, y=0.190, frequency=1, skip=False, adjust=False
+    Shikigami, direction=left, attacks=3, repetitions=1
+    Shikigami, direction=right, attacks=3, repetitions=1
+    Wait, duration=0.1
+*, x=0.280, y=0.190, frequency=1, skip=False, adjust=False
+    Shikigami, direction=left, attacks=3, repetitions=1
+    Shikigami, direction=right, attacks=3, repetitions=1
+    Wait, duration=0.2
+    Keypress1
+
+@, label=atk
