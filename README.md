@@ -1,13 +1,8 @@
-
 <h1 align="center">
   Auto Maple
 </h1>
 
-Auto Maple is an intelligent Python bot that plays MapleStory, a 2D
-side-scrolling MMORPG, using simulated key presses, TensorFlow machine
-learning, OpenCV template matching, and other computer vision techniques.
-
-This is my forked version of the code since it has not been updated in quite a while.
+Auto Maple is an intelligent Python bot that plays MapleStory, a 2D side-scrolling MMORPG, using simulated key presses, TensorFlow machine learning, OpenCV template matching, and other computer vision techniques.
 
 Community-created resources, such as **command books** for each class and **routines** for each map, can be found in the **[resources repository](https://github.com/tanjeffreyz/auto-maple-resources)**.
 
@@ -174,29 +169,27 @@ Auto Maple has the ability to automatically solve "runes", or in-game arrow key 
 
 <ol>
   <li>
-    conda create -n automaple python=3.9
+    Download and install <a href="https://www.python.org/downloads/">Python3</a>.
   </li>
   <li>
-    conda activate automaple
-  </li>
-  <li>
-    conda install -c conda-forge cudatoolkit=11.2 cudnn=8.1.0
+    Download and install the latest version of <a href="https://developer.nvidia.com/cuda-downloads">CUDA Toolkit</a>.
   </li>
   <li>
     Download and install <a href="https://git-scm.com/download/win">Git</a>.
   </li>
   <li>
+    Download and unzip the latest <a href="https://github.com/tanjeffreyz02/auto-maple/releases">Auto Maple release</a>.
+  </li>
+  <li>
+    Download the <a href="https://drive.google.com/drive/folders/1SPdTNF4KZczoWyWTgfyTBRvLvy7WSGpu?usp=sharing">TensorFlow model</a> and unzip the "models" folder into Auto Maple's "assets" directory.
+  </li>
+  <li>
     Inside Auto Maple's main directory, open a command prompt and run:
     <pre><code>python -m pip install -r requirements.txt</code></pre>
-    Note: Make sure you are in a windows system to run this. Not WSL or anything like that.
   </li>
   <li>
     Lastly, create a desktop shortcut by running:
     <pre><code>python setup.py</code></pre>
-    This shortcut uses absolute paths, so feel free to move it wherever you want. However, if you move Auto Maple's main directory, you will need to run <code>python setup.py</code> again to generate a new shortcut. To keep the command prompt open after Auto Maple closes, run the above command with the <code>--stay</code> flag. Otherwise run main.py with administrator privlidges. Admin privlige is necessary for automaple to use certain key presses and will not work properly without it.
-  </li>
-
-  <li>
-    Download the <a href="https://drive.google.com/drive/folders/1SPdTNF4KZczoWyWTgfyTBRvLvy7WSGpu?usp=sharing">TensorFlow model</a> and unzip the "models" folder into Auto Maple's "assets" directory. Current model does not actually work at the moment but is a placeholder while I try to find a solution to the rune problem.
+    This shortcut uses absolute paths, so feel free to move it wherever you want. However, if you move Auto Maple's main directory, you will need to run <code>python setup.py</code> again to generate a new shortcut. To keep the command prompt open after Auto Maple closes, run the above command with the <code>--stay</code> flag.
   </li>
 </ol>

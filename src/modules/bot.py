@@ -1,11 +1,7 @@
 """An interpreter that reads and executes user-created routines."""
 
-import importlib
-import inspect
 import threading
 import time
-import traceback
-from os.path import basename, splitext
 
 import cv2
 import git
@@ -15,9 +11,17 @@ from src.common import config, utils
 from src.common.interfaces import Configurable
 from src.common.vkeys import click, press
 from src.detection import detection
-from src.routine import components
 from src.routine.components import Point
 from src.routine.routine import Routine
+
+# import importlib
+# import inspect
+# from src.routine import components
+# import traceback
+
+
+# from os.path import basename, splitext
+
 
 # The rune's buff icon
 RUNE_BUFF_TEMPLATE = cv2.imread("assets/rune_buff_template.jpg", 0)
@@ -36,7 +40,10 @@ class Bot(Configurable):
 
         self.rune_active = False
         self.rune_pos = (0, 0)
-        self.rune_closest_pos = (0, 0)  # Location of the Point closest to rune
+        self.rune_closest_pos = (
+            0,
+            0,
+        )  # Location of the Point closest to rune
         self.submodules = []
         self.command_book = None  # CommandBook instance
         # self.module_name = None
@@ -145,8 +152,14 @@ class Bot(Configurable):
                         if rune_buff:
                             rune_buff_pos = min(rune_buff, key=lambda p: p[0])
                             target = (
-                                round(rune_buff_pos[0] + config.capture.window["left"]),
-                                round(rune_buff_pos[1] + config.capture.window["top"]),
+                                round(
+                                    rune_buff_pos[0]
+                                    + config.capture.window["left"]
+                                ),
+                                round(
+                                    rune_buff_pos[1]
+                                    + config.capture.window["top"]
+                                ),
                             )
                             click(target, button="right")
                     self.rune_active = False
@@ -251,7 +264,9 @@ class Bot(Configurable):
                     url = lines[i + 2].split("=")[1].strip()
                     self.submodules.append(path)
                     try:
-                        repo.git.clone(url, path)  # First time loading submodule
+                        repo.git.clone(
+                            url, path
+                        )  # First time loading submodule
                         print(f" -  Initialized submodule '{path}'")
                     except git.exc.GitCommandError:
                         sub_repo = git.Repo(path)
