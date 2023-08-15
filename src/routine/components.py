@@ -11,6 +11,8 @@ from src.common.vkeys import key_down, key_up, press
 #       Routine Components      #
 #################################
 class Component:
+    """Routine Component"""
+
     id = "Routine Component"
     PRIMITIVES = {int, str, bool, float}
 
