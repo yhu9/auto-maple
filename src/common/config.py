@@ -1,10 +1,11 @@
 """A collection of variables shared across multiple modules."""
-
+import os
 
 #########################
 #       Constants       #
 #########################
 RESOURCES_DIR = "resources"
+CUSTOM_CMD_DIR = os.path.join(RESOURCES_DIR, "custom_cmds")
 
 
 #################################
@@ -43,3 +44,5 @@ listener = None
 
 # Shares the gui to all modules
 gui = None
+
+# Recorder

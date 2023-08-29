@@ -168,11 +168,11 @@ class Bot(Configurable):
                     inferences.append(solution)
 
     def load_commands(self, file):
-        try:
-            self.command_book = CommandBook(file)
-            config.gui.settings.update_class_bindings()
-        except ValueError:
-            pass  # TODO: UI warning popup, say check cmd for errors
+        # try:
+        self.command_book = CommandBook(file)
+        config.gui.settings.update_class_bindings()
+        # except ValueError:
+        # pass  # TODO: UI warning popup, say check cmd for errors
         #
         # utils.print_separator()
         # print(f"[~] Loading command book '{basename(file)}':")
